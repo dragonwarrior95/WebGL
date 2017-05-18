@@ -52,11 +52,11 @@
 <body onload="main()">
     <div id="client">
         <div id="LeftPanel">
-            <p><label>半径：</label><input id="PointSize" type="range" min="0" max="255" value="5" multiple="multiple" onchange="onChange(value)"></p>
-            <p><label>Red：</label><input id="red" type="range" min="0" max="255" value="255" onchange="onRValue(value)"></p>
-            <p><label>Green：</label><input id="green" type="range" min="0" max="255" value="0" onchange="onGValue(value)"></p>
-            <p><label>Blue：</label><input id="blue" type="range" min="0" max="255" value="0" onchange="onBValue(value)"></p>
-            <p><label>Alpha：</label><input id="alpha" type="range" min="0" max="255" value="255" onchange="onAValue(value)"></p>
+            <p><label>半径：</label><input id="PointSize" type="range" min="0" max="255" value="5" oninput="onChange(value)" onchange="onChange(value)"></p>
+            <p><label>Red：</label><input id="red" type="range" min="0" max="255" value="255" oninput="onRValue(value)" onchange="onRValue(value)"></p>
+            <p><label>Green：</label><input id="green" type="range" min="0" max="255" value="0" oninput="onGValue(value)" onchange="onGValue(value)"></p>
+            <p><label>Blue：</label><input id="blue" type="range" min="0" max="255" value="0" oninput="onBValue(value)" onchange="onBValue(value)"></p>
+            <p><label>Alpha：</label><input id="alpha" type="range" min="0" max="255" value="255" oninput="onAValue(value)" onchange="onAValue(value)"></p>
         </div>
         <div id="RightPanel">
             <canvas id="canvas" width="1024px" height="768px">
