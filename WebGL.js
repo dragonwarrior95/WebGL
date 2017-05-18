@@ -20,9 +20,11 @@ var VSHADER_SOURCE =
     '}'
 
 var FSHADER_SOURCE =
+    'precision mediump float;\n' +// 要添加这行不然初始化会失败
+    'uniform vec4 u_FragColor;\n' +
     'void main()\n' +
     '{\n' +
-    '    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n' +
+    '    gl_FragColor = u_FragColor;\n' +
     '}'
 
 function main() {
@@ -32,7 +34,7 @@ function main() {
         return;
     }
 
-    var gl = getWebGLContext(canvas);
+    var gl = getWebGLContext(canvas, true);
     if (gl == null) {
         print("Get gl context failure......");
     }
@@ -52,6 +54,12 @@ function main() {
         print("get a_Position failure......");
         return;
     }
+
+    var u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    if (u_FragColor < 0) {
+        print("get u_FragColor failure......");
+        return;
+    }
     
     canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
     canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
@@ -59,6 +67,7 @@ function main() {
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
     gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
+    gl.uniform4f(u_FragColor, 0.0, 0.0, 1.0, 1.0);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
