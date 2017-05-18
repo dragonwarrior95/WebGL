@@ -55,6 +55,7 @@ function main() {
     
     canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
     canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
+    canvas.addEventListener("touchMove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
     gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
@@ -67,12 +68,15 @@ function main() {
 
 var g_points = [];
 function onMouseDown(ev, gl, canvas, a_Position) {
-    var x = ev.clientX;
-    var y = ev.clientY;
+    var x = ev.x - canvas.offsetLeft;
+    var y = ev.y - canvas.offsetTop;
     var rect = ev.target.getBoundingClientRect();
 
-    x = ((x-rect.left) - canvas.height / 2) / (canvas.height / 2);
-    y = (canvas.width / 2 - (y - rect.top)) / (canvas.width / 2);
+    var width = canvas.width / 2;
+    var height= canvas.height/2;
+
+    x = (x - width) / width;
+    y = (height - y) / height;
 
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -80,15 +84,37 @@ function onMouseDown(ev, gl, canvas, a_Position) {
     gl.drawArrays(gl.POINTS, 0, 1);
 }
 function onMouseMove(ev, gl, canvas, a_Position) {
-    var x = ev.clientX;
-    var y = ev.clientY;
+    var x = ev.x - canvas.offsetLeft;
+    var y = ev.y - canvas.offsetTop;
     var rect = ev.target.getBoundingClientRect();
 
-    x = ((x-rect.left) - canvas.height / 2) / (canvas.height / 2);
-    y = (canvas.width / 2 - (y - rect.top)) / (canvas.width / 2);
+    var width = canvas.width / 2;
+    var height= canvas.height/2;
+
+    x = (x - width) / width;
+    y = (height - y) / height;
 
     var div = $("console");
     div.innerHTML = "point(" + ev.clientX + "," + ev.clientY + ")<br/>gl(" +
+        x.toFixed(2) + "," + y.toFixed(2) + ")";
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.vertexAttrib3f(a_Position, x, y, 0.0);
+    gl.drawArrays(gl.POINTS, 0, 1);
+}
+function onTouchMove(ev, gl, canvas, a_Position) {
+    var x = ev.x - canvas.offsetLeft;
+    var y = ev.y - canvas.offsetTop;
+    var rect = ev.target.getBoundingClientRect();
+
+    var width = canvas.width / 2;
+    var height= canvas.height/2;
+
+    x = (x - width) / width;
+    y = (height - y) / height;
+
+    var div = $("console");
+    div.innerHTML = "point(" + ev.touches[0].pageX + "," + ev.touches[0].pageY + ")<br/>gl(" +
         x.toFixed(2) + "," + y.toFixed(2) + ")";
     gl.clear(gl.COLOR_BUFFER_BIT);
 
