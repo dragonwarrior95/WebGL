@@ -64,6 +64,7 @@ var FSHADER_SOURCE =
     '    gl_FragColor = u_FragColor;\n' +
     '}'
 
+var a_Position;
 var a_PointSize;
 var u_FragColor;
 var gl;
@@ -90,7 +91,7 @@ function main() {
         print("get a_PointSize failure......");
     }
     // 获取a_Position
-    var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+    a_Position = gl.getAttribLocation(gl.program, 'a_Position');
     if (a_Position < 0) {
         print("get a_Position failure......");
         return;
@@ -101,17 +102,22 @@ function main() {
         print("get u_FragColor failure......");
         return;
     }
-    
-    canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
-    canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
-    canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
 
-    canvas.addEventListener("touchStart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
-    canvas.addEventListener("touchEnd", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
-    canvas.addEventListener("touchMove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
+    var n = initVertexBuffers(gl);
+    if (n < 0) {
+        return;
+    }
+    
+    // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
+    // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
+    // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
+    //
+    // canvas.addEventListener("touchStart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchEnd", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchMove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
-    gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
+    // gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
 
     red = 255.0;
     green = 0.0;
@@ -122,7 +128,31 @@ function main() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.POINTS, 0, 1);
+    gl.drawArrays(gl.LINE_LOOP, 0, n);
+}
+
+function initVertexBuffers(gl) {
+    var vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+    var n = 3;
+
+    // 创建缓冲区对象
+    var vertexBuffer = gl.createBuffer();
+    if (!vertexBuffer) {
+        print("create Buffer failure......");
+        return -1;
+    }
+
+    // 将缓冲区对象绑定到目标
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    // 向缓冲区对象写入数据
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    // 将缓冲区对象分配给a_Position变量
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+    // 连接a_Position变量与分配给他的缓冲区对象
+    gl.enableVertexAttribArray(a_Position);
+
+    return n;
 }
 
 var g_points = [];
