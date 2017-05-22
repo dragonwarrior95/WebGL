@@ -248,6 +248,35 @@ function onEditChange(files) {
         // var value = files.item(0).getAsDataURL();
         onLoadImage(value);
     }
+
+    // var pic = document.getElementById(picId);
+    // var fileName = null;
+    // var file = document.getElementById(fileId);
+    // if(window.FileReader){//chrome,firefox7+,opera,IE10+
+    //     oFReader = new FileReader();
+    //     oFReader.readAsDataURL(file.files[0]);
+    //     oFReader.onload = function (oFREvent) {
+    //         fileName = oFREvent.target.result;
+    //     };
+    // }
+    // else if (document.all) {//IE9-//IE使用滤镜，实际测试IE6设置src为物理路径发布网站通过http协议访问时还是没有办法加载图片
+    //     file.select();
+    //     file.blur();//要添加这句，要不会报拒绝访问错误（IE9或者用ie9+默认ie8-都会报错，实际的IE8-不会报错）
+    //     var reallocalpath = document.selection.createRange().text//IE下获取实际的本地文件路径
+    //     //if (window.ie6) pic.src = reallocalpath; //IE6浏览器设置img的src为本地路径可以直接显示图片
+    //     //else { //非IE6版本的IE由于安全问题直接设置img的src无法显示本地图片，但是可以通过滤镜来实现，IE10浏览器不支持滤镜，需要用FileReader来实现，所以注意判断FileReader先
+    //     fileName = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';//设置img的src为base64编码的透明图片，要不会显示红xx
+    //     // }
+    // }
+    // else if (file.files) {//firefox6-
+    //     if (file.files.item(0)) {
+    //         url = file.files.item(0).getAsDataURL();
+    //         fileName = url;
+    //     }
+    // }
+    // if (fileName != null) {
+    //     onLoadImage(fileName);
+    // }
 }
 
 var g_points = [];
@@ -328,5 +357,35 @@ function onTouchMove(ev, gl, canvas, a_Position) {
 
         gl.vertexAttrib3f(a_Position, x, y, 0.0);
         gl.drawArrays(gl.POINTS, 0, 1);
+    }
+}
+
+
+{
+    //使用IE条件注释来判断是否IE6，通过判断userAgent不一定准确
+    function change(picId,fileId) {
+        var pic = document.getElementById(picId);
+        var file = document.getElementById(fileId);
+        if(window.FileReader){//chrome,firefox7+,opera,IE10+
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(file.files[0]);
+            oFReader.onload = function (oFREvent) {pic.src = oFREvent.target.result;};
+        }
+        else if (document.all) {//IE9-//IE使用滤镜，实际测试IE6设置src为物理路径发布网站通过http协议访问时还是没有办法加载图片
+            file.select();
+            file.blur();//要添加这句，要不会报拒绝访问错误（IE9或者用ie9+默认ie8-都会报错，实际的IE8-不会报错）
+            var reallocalpath = document.selection.createRange().text//IE下获取实际的本地文件路径
+            //if (window.ie6) pic.src = reallocalpath; //IE6浏览器设置img的src为本地路径可以直接显示图片
+            //else { //非IE6版本的IE由于安全问题直接设置img的src无法显示本地图片，但是可以通过滤镜来实现，IE10浏览器不支持滤镜，需要用FileReader来实现，所以注意判断FileReader先
+            pic.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='image',src=\"" + reallocalpath + "\")";
+            pic.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';//设置img的src为base64编码的透明图片，要不会显示红xx
+            // }
+        }
+        else if (file.files) {//firefox6-
+            if (file.files.item(0)) {
+                url = file.files.item(0).getAsDataURL();
+                pic.src = url;
+            }
+        }
     }
 }
