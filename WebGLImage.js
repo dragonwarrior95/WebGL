@@ -159,9 +159,9 @@ function main() {
 
     // tick();
     initTexture(gl);
-    onLoadImage("1.jpg");
+    onLoadImage("512.jpg");
 
-    gl.drawArrays(gl.LINE_STRIP, 0, n);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
 }
 
 var g_last = new Date();
@@ -238,7 +238,7 @@ function loadTexture(gl, texture, u_Sampler, image) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler, 0);
 
-    gl.drawArrays(gl.LINE_STRIP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
 function onEditChange(files) {
