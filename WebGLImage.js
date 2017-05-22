@@ -57,7 +57,7 @@ var VSHADER_SOURCE =
     'void main()\n' +
     '{\n' +
     '    gl_Position = a_Position;\n' +
-    '    gl_PointSize = a_PointSize;\n' +
+    // '    gl_PointSize = a_PointSize;\n' +
     '    v_TexCoord = a_TexCoord;\n' +
     '}'
 
@@ -96,27 +96,27 @@ function main() {
         return;
     }
 
-    a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize');
-    if (a_PointSize < 0) {
-        print("get a_PointSize failure......");
-    }
+    // a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize');
+    // if (a_PointSize < 0) {
+    //     print("get a_PointSize failure......");
+    // }
     // 获取a_Position
     a_Position = gl.getAttribLocation(gl.program, 'a_Position');
     if (a_Position < 0) {
         print("get a_Position failure......");
         return;
     }
-    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-    if (u_ModelMatrix < 0) {
-        print("get u_ModelMatrix failure");
-        return;
-    }
-
-    u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
-    if (u_FragColor < 0) {
-        print("get u_FragColor failure......");
-        return;
-    }
+    // u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    // if (u_ModelMatrix < 0) {
+    //     print("get u_ModelMatrix failure");
+    //     return;
+    // }
+    //
+    // u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    // if (u_FragColor < 0) {
+    //     print("get u_FragColor failure......");
+    //     return;
+    // }
 
     var n = initVertexBuffers(gl);
     if (n < 0) {
@@ -210,7 +210,7 @@ function initVertexBuffers(gl) {
     var texCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    var a_TexCoord = gl.getUniformLocation(gl.program, 'a_TexCoord');
+    var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
     gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT*4, vertices.BYTES_PER_ELEMENT*2);
     gl.enableVertexAttribArray(a_TexCoord);
 
@@ -235,7 +235,7 @@ function loadTexture(gl, texture, u_Sampler, image) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler, 0);
 
     gl.drawArrays(gl.LINE_LOOP, 0, 4);
