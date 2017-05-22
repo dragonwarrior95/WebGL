@@ -159,9 +159,9 @@ function main() {
 
     // tick();
     initTexture(gl);
-    onLoadImage("./1.jpg");
+    onLoadImage("1.jpg");
 
-    // gl.drawArrays(gl.LINE_LOOP, 0, n);
+    gl.drawArrays(gl.LINE_STRIP, 0, n);
 }
 
 var g_last = new Date();
@@ -235,10 +235,10 @@ function loadTexture(gl, texture, u_Sampler, image) {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler, 0);
 
-    gl.drawArrays(gl.LINE_LOOP, 0, 4);
+    gl.drawArrays(gl.LINE_STRIP, 0, 4);
 }
 
 function onEditChange(files) {
