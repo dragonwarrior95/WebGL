@@ -1,5 +1,7 @@
 /**
- * Created by dragon on 2017/3/14.
+ * Created by dragon on 2017/5/22.
+ *
+ * WebGL高级变换与动画基础
  */
 
 function print(msg) {
@@ -50,13 +52,10 @@ function onColorChange() {
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
     'attribute float a_PointSize;\n' +
-    'uniform vec4 u_Translation;\n' +
-    'uniform float u_CosB, u_SinB;\n' +
+    'uniform mat4 u_ModelMatrix;\n' +
     'void main()\n' +
     '{\n' +
-    '    gl_Position = a_Position + u_Translation;\n' +
-    '    gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;\n' +
-    '    gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;\n' +
+    '    gl_Position = u_ModelMatrix * a_Position;\n' +
     '    gl_PointSize = a_PointSize;\n' +
     '}'
 
@@ -69,7 +68,7 @@ var FSHADER_SOURCE =
     '}'
 
 var a_Position;
-var u_Translation;// 平移分量
+var u_ModelMatrix;// 平移分量
 var a_PointSize;
 var u_FragColor;
 var gl;
@@ -101,9 +100,9 @@ function main() {
         print("get a_Position failure......");
         return;
     }
-    u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
-    if (u_Translation < 0) {
-        print("get u_Translation failure");
+    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    if (u_ModelMatrix < 0) {
+        print("get u_ModelMatrix failure");
         return;
     }
 
@@ -117,7 +116,7 @@ function main() {
     if (n < 0) {
         return;
     }
-    
+
     // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
     // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
     // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
@@ -128,16 +127,6 @@ function main() {
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
     // gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
-    gl.uniform4f(u_Translation, 0.5, 0, 0, 0);
-
-    // var u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
-    // var u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
-    // var angle = 90.0;
-    // var radian = Math.PI * angle / 180.0;
-    // var CosB = Math.cos(radian);
-    // var SinB = Math.sin(radian);
-    // gl.uniform1f(u_CosB, CosB);
-    // gl.uniform1f(u_SinB, SinB);
 
     red = 255.0;
     green = 0.0;
@@ -148,15 +137,49 @@ function main() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // 设置变换矩阵
+    var modelMatrix = new Matrix4();
+    var angle = 0.0;
+    // modelMatrix.setRotate(angle, 0, 0, 1);
+    // modelMatrix.setTranslate(0.5, 0, 0);
+    // modelMatrix.setScale(1.5, 1.5, 0);
+    // modelMatrix.rotate(angle, 0, 0, 1);
+    // gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+    var tick = function () {
+        angle = animal(angle);
+        draw(gl, n, angle, modelMatrix, u_ModelMatrix);
+        requestAnimationFrame(tick);
+    }
+
+    tick();
+
+    gl.drawArrays(gl.LINE_LOOP, 0, n);
+}
+
+var g_last = new Date();
+function animal(angle) {
+    var now = new Date();
+    var elapse = now - g_last;
+    g_last = now;
+
+    var newAngle = angle + (elapse * 45.0) / 1000;
+
+    return newAngle %= 360;
+}
+
+function draw(gl, n, angle, modelMatrix, u_ModelMatrix) {
+    modelMatrix.setRotate(angle, 0, 0, 1);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.LINE_LOOP, 0, n);
 }
 
 function initVertexBuffers(gl) {
     var vertices;
     var n;
-    if (1)
+    if (0)
     {
-        vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+        vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5, 0.0, 0.0]);
         n = 3;
     }
     else
@@ -216,23 +239,23 @@ function onMouseUp(ev, gl, canvas, a_Position) {
 }
 function onMouseMove(ev, gl, canvas, a_Position) {
     if (bLButtonDown === true) {
-    var x = ev.x - canvas.offsetLeft;
-    var y = ev.y - canvas.offsetTop;
-    var rect = ev.target.getBoundingClientRect();
+        var x = ev.x - canvas.offsetLeft;
+        var y = ev.y - canvas.offsetTop;
+        var rect = ev.target.getBoundingClientRect();
 
-    var width = canvas.width / 2;
-    var height= canvas.height/2;
+        var width = canvas.width / 2;
+        var height= canvas.height/2;
 
-    x = (x - width) / width;
-    y = (height - y) / height;
+        x = (x - width) / width;
+        y = (height - y) / height;
 
-    var div = $("console");
-    div.innerHTML = "point(" + ev.clientX + "," + ev.clientY + ")<br/>gl(" +
-        x.toFixed(2) + "," + y.toFixed(2) + ")";
-    gl.clear(gl.COLOR_BUFFER_BIT);
+        var div = $("console");
+        div.innerHTML = "point(" + ev.clientX + "," + ev.clientY + ")<br/>gl(" +
+            x.toFixed(2) + "," + y.toFixed(2) + ")";
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.vertexAttrib3f(a_Position, x, y, 0.0);
-    gl.drawArrays(gl.POINTS, 0, 1);
+        gl.vertexAttrib3f(a_Position, x, y, 0.0);
+        gl.drawArrays(gl.POINTS, 0, 1);
     }
 }
 
