@@ -50,9 +50,10 @@ function onColorChange() {
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
     'attribute float a_PointSize;\n' +
+    'uniform vec4 u_Translation;\n' +
     'void main()\n' +
     '{\n' +
-    '    gl_Position = a_Position;\n' +
+    '    gl_Position = a_Position + u_Translation;\n' +
     '    gl_PointSize = a_PointSize;\n' +
     '}'
 
@@ -65,6 +66,7 @@ var FSHADER_SOURCE =
     '}'
 
 var a_Position;
+var u_Translation;// 平移分量
 var a_PointSize;
 var u_FragColor;
 var gl;
@@ -96,6 +98,11 @@ function main() {
         print("get a_Position failure......");
         return;
     }
+    u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
+    if (u_Translation < 0) {
+        print("get u_Translation failure");
+        return;
+    }
 
     u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
     if (u_FragColor < 0) {
@@ -112,12 +119,13 @@ function main() {
     // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
     // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
     //
-    // canvas.addEventListener("touchStart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchEnd", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchMove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
     // gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
+    gl.uniform4f(u_Translation, 0.5, 0, 0, 0);
 
     red = 255.0;
     green = 0.0;
@@ -132,8 +140,18 @@ function main() {
 }
 
 function initVertexBuffers(gl) {
-    var vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
-    var n = 3;
+    var vertices;
+    var n;
+    if (0)
+    {
+        vertices = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+        n = 3;
+    }
+    else
+    {
+        vertices = new Float32Array([-0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5]);
+        n = 4;
+    }
 
     // 创建缓冲区对象
     var vertexBuffer = gl.createBuffer();
