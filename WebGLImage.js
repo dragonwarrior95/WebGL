@@ -49,15 +49,32 @@ function onColorChange() {
     gl.drawArrays(gl.POINTS, 0, 1);
 }
 
+function onScaleValue(scale) {
+    // 设置变换矩阵
+    modelMatrix.setScale(scale / 100.0, scale / 100.0, 1.0);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+}
+
+function onRotateValue(angle) {
+    // 设置变换矩阵
+    modelMatrix.setRotate(angle, 0, 0, 1);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+}
+
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
-    'attribute float a_PointSize;\n' +
     'attribute vec2 a_TexCoord;\n' +
     'varying vec2 v_TexCoord;\n' +
+    'uniform mat4 u_ModelMatrix;\n' +
     'void main()\n' +
     '{\n' +
-    '    gl_Position = a_Position;\n' +
-    // '    gl_PointSize = a_PointSize;\n' +
+    '    gl_Position = u_ModelMatrix * a_Position;\n' +
     '    v_TexCoord = a_TexCoord;\n' +
     '}'
 
@@ -71,14 +88,20 @@ var FSHADER_SOURCE =
     // '    gl_FragColor = vec4(1.0, 0, 0, 1.0);\n' +
     '}'
 
-var a_Position;
-var u_ModelMatrix;// 平移分量
-var a_PointSize;
-var u_FragColor;
+
+var u_ModelMatrix;// 变换矩阵
+var modelMatrix;  // 变换矩阵值
+var a_TexCoord; // 纹理坐标
+var a_Position; // 顶点坐标
+var vertexBuffer;   // 顶点坐标值
+var texCoordBuffer; // 纹理坐标值
+
+var texture;    // 纹理值
+var u_Sampler;  // 纹理
+
 var gl;
 var bLButtonDown = false;
-var texture;
-var u_Sampler;
+
 function main() {
     var canvas = $("canvas");
     if (canvas == null) {
@@ -96,72 +119,55 @@ function main() {
         return;
     }
 
-    // a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize');
-    // if (a_PointSize < 0) {
-    //     print("get a_PointSize failure......");
-    // }
+    // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
+    // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
+    // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
+    if (canvas.addEventListener) {
+        // IE9, Chrome, Safari, Opera
+        canvas.addEventListener("mousewheel", onMouseWheel, false);
+        // Firefox
+        canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
+    }
+    else {
+        // IE 6/7/8
+        canvas.attachEvent("onmousewheel", onMouseWheel);
+    }
+
+    // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
+    // canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
+
     // 获取a_Position
     a_Position = gl.getAttribLocation(gl.program, 'a_Position');
     if (a_Position < 0) {
         print("get a_Position failure......");
         return;
     }
-    // u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-    // if (u_ModelMatrix < 0) {
-    //     print("get u_ModelMatrix failure");
-    //     return;
-    // }
-    //
-    // u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
-    // if (u_FragColor < 0) {
-    //     print("get u_FragColor failure......");
-    //     return;
-    // }
 
-    var n = initVertexBuffers(gl);
-    if (n < 0) {
+    // 设置变换矩阵
+    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    if (u_ModelMatrix < 0) {
+        print("get u_ModelMatrix failure");
         return;
     }
 
-    // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
-    // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
-    // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
-    //
-    // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
 
-    // gl.vertexAttrib1f(a_PointSize, 10.0);
-    // gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
+    var n = initVertexBuffers(gl);// 初始化顶点
+    if (n < 0) {
+        return;
+    }
+    initTexture(gl);// 初始化纹理
 
-    // red = 255.0;
-    // green = 0.0;
-    // blue = 0.0;
-    // alpha = 255;
-    // gl.uniform4f(u_FragColor, red / 255.0, green/255.0, blue/255.0, alpha / 255.0);
+    modelMatrix = new Matrix4();
+    modelMatrix.setScale(1.0, 1.0, 1.0);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // 设置变换矩阵
-    // var modelMatrix = new Matrix4();
-    // var angle = 0.0;
-    // modelMatrix.setRotate(angle, 0, 0, 1);
-    // modelMatrix.setTranslate(0.5, 0, 0);
-    // modelMatrix.setScale(1.5, 1.5, 0);
-    // modelMatrix.rotate(angle, 0, 0, 1);
-    // gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-    // var tick = function () {
-    //     angle = animal(angle);
-    //     draw(gl, n, angle, modelMatrix, u_ModelMatrix);
-    //     requestAnimationFrame(tick);
-    // }
-
-    // tick();
-    initTexture(gl);
     onLoadImage("1.jpg");
 
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
+    // gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
 }
 
 var g_last = new Date();
@@ -183,36 +189,21 @@ function draw(gl, n, angle, modelMatrix, u_ModelMatrix) {
 }
 
 function initVertexBuffers(gl) {
-    var vertices = new Float32Array([
-        -0.5, 0.5, 0.0, 1.0,
-        -0.5, -0.5, 0.0, 0.0,
-        0.5, -0.5, 1.0, 0.0,
-        0.5, 0.5, 1.0, 1.0
-    ]);
     var n = 4;
 
     // 创建缓冲区对象
-    var vertexBuffer = gl.createBuffer();
+    vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
         print("create Buffer failure......");
         return -1;
     }
 
-    // 将缓冲区对象绑定到目标
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    // 向缓冲区对象写入数据
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    // 将缓冲区对象分配给a_Position变量
-    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT*4, 0);
-    // 连接a_Position变量与分配给他的缓冲区对象
-    gl.enableVertexAttribArray(a_Position);
-
-    var texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    var a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
-    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT*4, vertices.BYTES_PER_ELEMENT*2);
-    gl.enableVertexAttribArray(a_TexCoord);
+    texCoordBuffer = gl.createBuffer();
+    if (!texCoordBuffer) {
+        print("create Buffer failure......");
+        return -1;
+    }
+    setAutoShow(1280, 800);
 
     return n;
 }
@@ -225,7 +216,8 @@ function initTexture(gl) {
 function onLoadImage(fileName) {
     var image = new Image();
     image.onload = function () {
-        loadTexture(gl, texture, u_Sampler, image);
+        // setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
+        loadTexture(gl, texture, u_Sampler, image);// 加载纹理
     };
     image.src = fileName;
 }
@@ -240,7 +232,113 @@ function loadTexture(gl, texture, u_Sampler, image) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler, 0);
 
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+    gl.drawArrays(gl.POINTS, 0, 4);
+}
+
+function setAutoShow(gl, imgWidth, imgHeight) {
+    var canvas = $("canvas");
+    var canvasWidth = canvas.width; // 画布宽高
+    var canvasHeight= canvas.height;
+
+    var startXonCanvas; // 图片在画布上显示的起始位置
+    var startYonCanvas;
+    var startXonImg;    // 图片显示的起始位置
+    var startYonImg;
+    var imgShowWidth;   // 图片显示宽高
+    var imgShowHeight;
+    var scale = 1.0;    // 缩放倍数
+
+    if (canvasWidth >= imgWidth && canvasHeight >= imgHeight) {
+        // 画布大
+        startXonCanvas = (canvasWidth - imgWidth) / 2.0;
+        startYonCanvas = (canvasHeight - imgHeight) / 2.0;
+        imgShowWidth = imgWidth;
+        imgShowHeight = imgHeight;
+    }
+    else {
+        var percentW = canvasWidth / imgWidth;
+        var percentH = canvasHeight / imgHeight;
+
+        if (percentH < percentW)
+            scale = percentH;
+        else
+            scale = percentW;
+
+        //得到缩略图的显示大小
+        imgShowWidth = imgWidth * scale;
+        imgShowHeight = imgHeight * scale;
+
+        startXonCanvas = (canvasWidth - imgShowWidth) / 2.0;
+        startYonCanvas = (canvasHeight - imgShowHeight) / 2.0;
+    }
+    startXonImg = 0.0;
+    startYonImg = 0.0;
+
+    // 转换为WebGL的顶点坐标
+    var width = canvas.width / 2;
+    var height= canvas.height/2;
+
+    // canvas上的坐标转换为WebGL上的坐标
+    // x1 = (y - width) / width;
+    // y1 = (height - x) / height;
+    // WebGL上的坐标对应图片上的坐标
+    var vertices = new Float32Array([
+        -1.0, 1.0, 0.0, 1.0,
+        -1.0, -1.0, 0.0, 0.0,
+        1.0, -1.0, 1.0, 0.0,
+        1.0, 1.0, 1.0, 1.0
+    ]);
+
+    // // 顶点坐标
+    // var vertices = new Float32Array([
+    //     (startXonCanvas - width) / width,               (height - startYonCanvas) / height,
+    //     (startXonCanvas - width) / width,               (height - (startYonCanvas + imgShowHeight)) / height,
+    //     (startXonCanvas + imgShowWidth - width) / width,(height - (startYonCanvas + imgShowHeight)) / height,
+    //     (startXonCanvas + imgShowWidth - width) / width,(height - startYonCanvas) / height
+    // ]);
+    //
+    // //　图片坐标
+    // var texCoords = new Float32Array([
+    //     startXonImg / imgWidth,                 startYonImg / imgHeight,
+    //     startXonImg / imgWidth,                 (startYonImg + imgShowHeight) / imgHeight,
+    //     (startXonImg + imgShowWidth) / imgWidth,startYonImg / imgHeight,
+    //     (startXonImg + imgShowWidth) / imgWidth,(startYonImg + imgShowHeight) / imgHeight
+    // ]);
+
+    // 顶点坐标图片坐标
+    var verticesTexCoords = new Float32Array([
+        (startXonCanvas - width) / width,               (height - startYonCanvas) / height,                     startXonImg / imgWidth,                 startYonImg / imgHeight,
+        (startXonCanvas - width) / width,               (height - (startYonCanvas + imgShowHeight)) / height,   startXonImg / imgWidth,                 (startYonImg + imgShowHeight) / imgHeight,
+        (startXonCanvas + imgShowWidth - width) / width,(height - (startYonCanvas + imgShowHeight)) / height,   (startXonImg + imgShowWidth) / imgWidth,startYonImg / imgHeight,
+        (startXonCanvas + imgShowWidth - width) / width,(height - startYonCanvas) / height,                     (startXonImg + imgShowWidth) / imgWidth,(startYonImg + imgShowHeight) / imgHeight
+    ]);
+
+    // 创建缓冲区对象
+    if (vertexBuffer) {
+        gl.deleteBuffer(vertexBuffer);
+    }
+    vertexBuffer = gl.createBuffer();
+    if (!vertexBuffer) {
+        print("create Buffer failure......");
+        return -1;
+    }
+    // 将缓冲区对象绑定到目标
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    // 向缓冲区对象写入数据
+    gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+    // 将缓冲区对象分配给a_Position变量
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, 0);
+    // 连接a_Position变量与分配给他的缓冲区对象
+    gl.enableVertexAttribArray(a_Position);
+
+    if (texCoordBuffer) {
+        gl.deleteBuffer(texCoordBuffer);
+    }
+    texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, verticesTexCoords.BYTES_PER_ELEMENT * 2);
+    gl.enableVertexAttribArray(a_TexCoord);
 }
 
 // 获取图片完整地址打开图片
@@ -268,7 +366,7 @@ function onEditChange(input) {
             reader.readAsDataURL(input.files[0]);
         }
     }
-    
+
     if (imgURL != "") {
         onLoadImage(imgURL);
     }
@@ -322,6 +420,17 @@ function onMouseMove(ev, gl, canvas, a_Position) {
 
         gl.vertexAttrib3f(a_Position, x, y, 0.0);
         gl.drawArrays(gl.POINTS, 0, 1);
+    }
+}
+
+function onMouseWheel(ev) {
+    if (ev.detail <= 0) {
+        // 缩小
+        $("scale").value -= 10;
+    }
+    else {
+        // 放大
+        $("scale").value += 10;
     }
 }
 
