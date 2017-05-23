@@ -122,16 +122,16 @@ function main() {
     // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
     // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
     // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
-    if (canvas.addEventListener) {
-        // IE9, Chrome, Safari, Opera
-        canvas.addEventListener("mousewheel", onMouseWheel, false);
-        // Firefox
-        canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
-    }
-    else {
-        // IE 6/7/8
-        canvas.attachEvent("onmousewheel", onMouseWheel);
-    }
+    // if (canvas.addEventListener) {
+    //     // IE9, Chrome, Safari, Opera
+    //     canvas.addEventListener("mousewheel", onMouseWheel, false);
+    //     // Firefox
+    //     canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
+    // }
+    // else {
+    //     // IE 6/7/8
+    //     canvas.attachEvent("onmousewheel", onMouseWheel);
+    // }
 
     // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
     // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
@@ -144,6 +144,12 @@ function main() {
         return;
     }
 
+    var n = initVertexBuffers(gl);// 初始化顶点
+    if (n < 0) {
+        return;
+    }
+    initTexture(gl);// 初始化纹理
+
     // 设置变换矩阵
     u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
     if (u_ModelMatrix < 0) {
@@ -151,16 +157,10 @@ function main() {
         return;
     }
 
-
-    var n = initVertexBuffers(gl);// 初始化顶点
-    if (n < 0) {
-        return;
-    }
-    initTexture(gl);// 初始化纹理
-
     modelMatrix = new Matrix4();
     modelMatrix.setScale(1.0, 1.0, 1.0);
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -203,7 +203,35 @@ function initVertexBuffers(gl) {
         print("create Buffer failure......");
         return -1;
     }
-    setAutoShow(1280, 800);
+    // setAutoShow(1280, 800);
+
+    // canvas上的坐标转换为WebGL上的坐标
+    // x1 = (y - width) / width;
+    // y1 = (height - x) / height;
+    // WebGL上的坐标对应图片上的坐标
+    var vertices = new Float32Array([
+        -1.0, 1.0, 0.0, 1.0,
+        -1.0, -1.0, 0.0, 0.0,
+        1.0, -1.0, 1.0, 0.0,
+        1.0, 1.0, 1.0, 1.0
+    ]);
+    // 对象绑定到目标
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    // 向缓冲区对象写入数据
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    // 将缓冲区对象分配给a_Position变量
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, 0);
+    // 连接a_Position变量与分配给他的缓冲区对象
+    gl.enableVertexAttribArray(a_Position);
+
+    if (texCoordBuffer) {
+        gl.deleteBuffer(texCoordBuffer);
+    }
+    texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, vertices.BYTES_PER_ELEMENT * 2);
+    gl.enableVertexAttribArray(a_TexCoord);
 
     return n;
 }
@@ -232,7 +260,7 @@ function loadTexture(gl, texture, u_Sampler, image) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler, 0);
 
-    gl.drawArrays(gl.POINTS, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
 function setAutoShow(gl, imgWidth, imgHeight) {
@@ -461,35 +489,5 @@ function onTouchMove(ev, gl, canvas, a_Position) {
 
         gl.vertexAttrib3f(a_Position, x, y, 0.0);
         gl.drawArrays(gl.POINTS, 0, 1);
-    }
-}
-
-
-{
-    //使用IE条件注释来判断是否IE6，通过判断userAgent不一定准确
-    function change(picId,fileId) {
-        var pic = document.getElementById(picId);
-        var file = document.getElementById(fileId);
-        if(window.FileReader){//chrome,firefox7+,opera,IE10+
-            var oFReader = new FileReader();
-            oFReader.readAsDataURL(file.files[0]);
-            oFReader.onload = function (oFREvent) {pic.src = oFREvent.target.result;};
-        }
-        else if (document.all) {//IE9-//IE使用滤镜，实际测试IE6设置src为物理路径发布网站通过http协议访问时还是没有办法加载图片
-            file.select();
-            file.blur();//要添加这句，要不会报拒绝访问错误（IE9或者用ie9+默认ie8-都会报错，实际的IE8-不会报错）
-            var reallocalpath = document.selection.createRange().text//IE下获取实际的本地文件路径
-            //if (window.ie6) pic.src = reallocalpath; //IE6浏览器设置img的src为本地路径可以直接显示图片
-            //else { //非IE6版本的IE由于安全问题直接设置img的src无法显示本地图片，但是可以通过滤镜来实现，IE10浏览器不支持滤镜，需要用FileReader来实现，所以注意判断FileReader先
-            pic.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='image',src=\"" + reallocalpath + "\")";
-            pic.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';//设置img的src为base64编码的透明图片，要不会显示红xx
-            // }
-        }
-        else if (file.files) {//firefox6-
-            if (file.files.item(0)) {
-                url = file.files.item(0).getAsDataURL();
-                pic.src = url;
-            }
-        }
     }
 }
