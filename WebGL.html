@@ -57,7 +57,7 @@
 <body onload="main()">
     <div id="client">
         <div id="LeftPanel">
-            <p><input type="file" id="browsefile" onchange="onEditChange(this.files)"></p>
+            <p><input type="file" id="browsefile" onchange="onEditChange(this)"></p>
             <p><input type="button" id="filebutton" value="打开图片" onclick="browsefile.click()"></p>
             <p><input type="textfield" id="filepath"></p>
 
@@ -68,7 +68,7 @@
             <p><label>Alpha：</label><input id="alpha" type="range" min="0" max="255" value="255" oninput="onAValue(value)" onchange="onAValue(value)"></p>
         </div>
         <div id="RightPanel">
-            <canvas id="canvas" width="768" height="768px">
+            <canvas id="canvas" width="1024" height="768px">
                 你的浏览器不支持webGL
             </canvas>
         </div>
