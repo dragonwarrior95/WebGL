@@ -305,11 +305,18 @@ function setAutoShow(gl, imgWidth, imgHeight) {
     // ]);
 
     // 顶点坐标图片坐标
+    // var verticesTexCoords = new Float32Array([
+    //     (startXonCanvas - width) / width,               (height - startYonCanvas) / height,                     startXonImg / imgWidth,                 (imgHeight - startYonImg) / imgHeight,
+    //     (startXonCanvas - width) / width,               (height - (startYonCanvas + imgShowHeight)) / height,   startXonImg / imgWidth,                 (imgHeight - startYonImg - imgShowHeight) / imgHeight,
+    //     (startXonCanvas + imgShowWidth - width) / width,(height - (startYonCanvas + imgShowHeight)) / height,   (startXonImg + imgShowWidth) / imgWidth,(imgHeight - startYonImg) / imgHeight,
+    //     (startXonCanvas + imgShowWidth - width) / width,(height - startYonCanvas) / height,                     (startXonImg + imgShowWidth) / imgWidth,(imgHeight - startYonImg - imgShowHeight) / imgHeight
+    // ]);
+
     var verticesTexCoords = new Float32Array([
-        (startXonCanvas - width) / width,               (height - startYonCanvas) / height,                     startXonImg / imgWidth,                 startYonImg / imgHeight,
-        (startXonCanvas - width) / width,               (height - (startYonCanvas + imgShowHeight)) / height,   startXonImg / imgWidth,                 (startYonImg + imgShowHeight) / imgHeight,
-        (startXonCanvas + imgShowWidth - width) / width,(height - (startYonCanvas + imgShowHeight)) / height,   (startXonImg + imgShowWidth) / imgWidth,startYonImg / imgHeight,
-        (startXonCanvas + imgShowWidth - width) / width,(height - startYonCanvas) / height,                     (startXonImg + imgShowWidth) / imgWidth,(startYonImg + imgShowHeight) / imgHeight
+        (startXonCanvas - width) / width,               (height - startYonCanvas) / height,                     0.0,1.0,
+        (startXonCanvas - width) / width,               (height - (startYonCanvas + imgShowHeight)) / height,   0.0,0.0,
+        (startXonCanvas + imgShowWidth - width) / width,(height - (startYonCanvas + imgShowHeight)) / height,   1.0,0.0,
+        (startXonCanvas + imgShowWidth - width) / width,(height - startYonCanvas) / height,                     1.0,1.0
     ]);
 
     // 创建缓冲区对象
