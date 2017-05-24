@@ -143,6 +143,7 @@ function main() {
         print("get a_Position failure......");
         return;
     }
+    a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
 
     var n = initVertexBuffers(gl);// 初始化顶点
     if (n < 0) {
