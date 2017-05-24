@@ -203,36 +203,6 @@ function initVertexBuffers(gl) {
         print("create Buffer failure......");
         return -1;
     }
-    // setAutoShow(1280, 800);
-
-    // canvas上的坐标转换为WebGL上的坐标
-    // x1 = (y - width) / width;
-    // y1 = (height - x) / height;
-    // WebGL上的坐标对应图片上的坐标
-    var vertices = new Float32Array([
-        -1.0, 1.0, 0.0, 1.0,
-        -1.0, -1.0, 0.0, 0.0,
-        1.0, -1.0, 1.0, 0.0,
-        1.0, 1.0, 1.0, 1.0
-    ]);
-    // 对象绑定到目标
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    // 向缓冲区对象写入数据
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    // 将缓冲区对象分配给a_Position变量
-    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, 0);
-    // 连接a_Position变量与分配给他的缓冲区对象
-    gl.enableVertexAttribArray(a_Position);
-
-    if (texCoordBuffer) {
-        gl.deleteBuffer(texCoordBuffer);
-    }
-    texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, vertices.BYTES_PER_ELEMENT * 2);
-    gl.enableVertexAttribArray(a_TexCoord);
-
     return n;
 }
 
@@ -244,7 +214,7 @@ function initTexture(gl) {
 function onLoadImage(fileName) {
     var image = new Image();
     image.onload = function () {
-        // setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
+        setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
         loadTexture(gl, texture, u_Sampler, image);// 加载纹理
     };
     image.src = fileName;
@@ -310,12 +280,12 @@ function setAutoShow(gl, imgWidth, imgHeight) {
     // x1 = (y - width) / width;
     // y1 = (height - x) / height;
     // WebGL上的坐标对应图片上的坐标
-    var vertices = new Float32Array([
-        -1.0, 1.0, 0.0, 1.0,
-        -1.0, -1.0, 0.0, 0.0,
-        1.0, -1.0, 1.0, 0.0,
-        1.0, 1.0, 1.0, 1.0
-    ]);
+    // var vertices = new Float32Array([
+    //     -1.0, 1.0, 0.0, 1.0,
+    //     -1.0, -1.0, 0.0, 0.0,
+    //     1.0, -1.0, 1.0, 0.0,
+    //     1.0, 1.0, 1.0, 1.0
+    // ]);
 
     // // 顶点坐标
     // var vertices = new Float32Array([
