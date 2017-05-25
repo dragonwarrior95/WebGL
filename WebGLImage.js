@@ -122,16 +122,16 @@ function main() {
     // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
     // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
     // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
-    // if (canvas.addEventListener) {
-    //     // IE9, Chrome, Safari, Opera
-    //     canvas.addEventListener("mousewheel", onMouseWheel, false);
-    //     // Firefox
-    //     canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
-    // }
-    // else {
-    //     // IE 6/7/8
-    //     canvas.attachEvent("onmousewheel", onMouseWheel);
-    // }
+    if (canvas.addEventListener) {
+        // IE9, Chrome, Safari, Opera
+        canvas.addEventListener("mousewheel", onMouseWheel, false);
+        // Firefox
+        canvas.addEventListener("DOMMouseScroll", onMouseWheel, false);
+    }
+    else {
+        // IE 6/7/8
+        canvas.attachEvent("onmousewheel", onMouseWheel);
+    }
 
     // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
     // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
@@ -163,7 +163,7 @@ function main() {
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.6, 0.6, 0.6, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     onLoadImage("1.jpg");
@@ -345,6 +345,8 @@ function setAutoShow(gl, imgWidth, imgHeight) {
     gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
     gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, verticesTexCoords.BYTES_PER_ELEMENT * 2);
     gl.enableVertexAttribArray(a_TexCoord);
+
+    $("scale").value = scale*100;
 }
 
 // 获取图片完整地址打开图片
@@ -430,14 +432,28 @@ function onMouseMove(ev, gl, canvas, a_Position) {
 }
 
 function onMouseWheel(ev) {
-    if (ev.detail <= 0) {
+    // cross-browser wheel delta
+    var e = window.event || ev; // old IE support
+    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+    var rangeScale = $("scale");
+    var scale = parseInt(rangeScale.value);
+    if (delta <= 0) {
         // 缩小
-        $("scale").value -= 10;
+        scale = scale - 10;
     }
     else {
         // 放大
-        $("scale").value += 10;
+        scale = scale + 10;
     }
+    rangeScale.value = scale;
+
+    // 设置变换矩阵
+    modelMatrix.setScale(scale / 100.0, scale / 100.0, 1.0);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
 function onTouchStart(ev, gl, canvas, a_Position) {
