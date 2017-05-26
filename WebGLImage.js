@@ -68,6 +68,31 @@ function onRotateValue(angle) {
 }
 
 
+function jsReadFiles(files) {
+    if (files.length) {
+        // var file = files[0];
+        var file = files;
+        var strContext;
+        var reader = new FileReader();//new一个FileReader实例
+        if (/text+/.test(file.type)) {//判断文件类型，是不是text类型
+            reader.onload = function() {
+                strContext = this.result;
+            }
+            reader.readAsText(file);
+        } else if(/image+/.test(file.type)) {//判断文件是不是imgage类型
+            reader.onload = function() {
+                strContext = this.result;
+            }
+            reader.readAsDataURL(file);
+        }
+        else {
+            strContext = this.result;
+        }
+
+        return strContext;
+    }
+}
+
 var u_ModelMatrix;// 变换矩阵
 var modelMatrix;  // 变换矩阵值
 var a_TexCoord; // 纹理坐标
@@ -84,6 +109,7 @@ var bLButtonDown = false;
 function main() {
     var vs = document.getElementById("vs");
     var fs = document.getElementById("fs");
+    // var vertexContext = jsReadFiles("shader.fs");
 
     var canvas = $("canvas");
     if (canvas == null) {
