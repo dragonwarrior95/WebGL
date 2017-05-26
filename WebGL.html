@@ -53,6 +53,27 @@
             border-color: blue;
         }
     </style>
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec4 a_Position;
+        attribute vec2 a_TexCoord;
+        varying vec2 v_TexCoord;
+        uniform mat4 u_ModelMatrix;
+        void main()
+        {
+            gl_Position = u_ModelMatrix * a_Position;
+            v_TexCoord = a_TexCoord;
+        }
+    </script>
+    <script id="fs" type="x-shader/x-fragment">
+        precision mediump float;// 要添加这行不然初始化会失败
+        uniform sampler2D u_Sampler;
+        varying vec2 v_TexCoord;
+        void main()
+        {
+            gl_FragColor = texture2D(u_Sampler, v_TexCoord);
+        // '    gl_FragColor = vec4(1.0, 0, 0, 1.0);\n' +
+        }
+    </script>
 </head>
 <body onload="main()">
     <div id="client">

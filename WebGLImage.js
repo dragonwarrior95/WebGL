@@ -67,27 +67,6 @@ function onRotateValue(angle) {
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
-var VSHADER_SOURCE =
-    'attribute vec4 a_Position;\n' +
-    'attribute vec2 a_TexCoord;\n' +
-    'varying vec2 v_TexCoord;\n' +
-    'uniform mat4 u_ModelMatrix;\n' +
-    'void main()\n' +
-    '{\n' +
-    '    gl_Position = u_ModelMatrix * a_Position;\n' +
-    '    v_TexCoord = a_TexCoord;\n' +
-    '}'
-
-var FSHADER_SOURCE =
-    'precision mediump float;\n' +// 要添加这行不然初始化会失败
-    'uniform sampler2D u_Sampler;\n' +
-    'varying vec2 v_TexCoord;\n' +
-    'void main()\n' +
-    '{\n' +
-    '    gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
-    // '    gl_FragColor = vec4(1.0, 0, 0, 1.0);\n' +
-    '}'
-
 
 var u_ModelMatrix;// 变换矩阵
 var modelMatrix;  // 变换矩阵值
@@ -103,6 +82,9 @@ var gl;
 var bLButtonDown = false;
 
 function main() {
+    var vs = document.getElementById("vs");
+    var fs = document.getElementById("fs");
+
     var canvas = $("canvas");
     if (canvas == null) {
         print("canvas is null");
@@ -114,7 +96,7 @@ function main() {
         print("Get gl context failure......");
     }
 
-    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+    if (!initShaders(gl, vs.text, fs.text)) {
         print("init shaders error......");
         return;
     }
