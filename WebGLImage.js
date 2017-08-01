@@ -110,7 +110,7 @@ function main() {
     var vs = document.getElementById("vs");
     var fs = document.getElementById("fs");
     // var vertexContext = jsReadFiles("shader.fs");
-
+    window.onresize=function(){onResize()};
     var canvas = $("canvas");
     if (canvas == null) {
         print("canvas is null");
@@ -492,4 +492,9 @@ function onTouchMove(ev, gl, canvas, a_Position) {
         gl.vertexAttrib3f(a_Position, x, y, 0.0);
         gl.drawArrays(gl.POINTS, 0, 1);
     }
+}
+
+function onResize(){
+    var canvas = $("canvas");
+    var div = $("RightPanel");
 }
