@@ -224,9 +224,23 @@ function onLoadImage(fileName) {
     var image = new Image();
     image.onload = function () {
         setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
-        loadTexture(gl, texture, u_Sampler, image);// 加载纹理
+
+        var filterBase = new FilterBase(gl, image.width, image.height);
+        filterBase.bindFBO();
+        loadTexture(gl, texture, u_Sampler, image);// 加载纹理到纹理中
+
+        filterBase.unBindFBO();
+        loadTextureFromTexture(gl, filterBase.m_FrameBufferTexture, u_Sampler);// 加载纹理
     };
     image.src = fileName;
+}
+
+function loadTextureFromTexture(gl, texture, u_sampler) {
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(u_sampler, 0);
+
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
 function loadTexture(gl, texture, u_Sampler, image) {
