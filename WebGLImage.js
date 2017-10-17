@@ -225,12 +225,13 @@ function onLoadImage(fileName) {
     image.onload = function () {
         setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
 
-        var filterBase = new FilterBase(gl, image.width, image.height);
+        var filterBase = new JFilterBase(gl, image.width, image.height);
+        filterBase.bind(texture, image.width, image.height);
         filterBase.bindFBO();
-        loadTexture(gl, texture, u_Sampler, image);// 加载纹理到纹理中
-
+        loadTexture(filterBase.getWebGL(), texture, u_Sampler, image);// 加载纹理到纹理中
+        let result_texture = filterBase.filterToFBO(true);
         filterBase.unBindFBO();
-        loadTextureFromTexture(gl, filterBase.m_FrameBufferTexture, u_Sampler);// 加载纹理
+        loadTextureFromTexture(filterBase.getWebGL(), result_texture, u_Sampler);// 加载纹理
     };
     image.src = fileName;
 }

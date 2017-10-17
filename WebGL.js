@@ -118,26 +118,26 @@ function main() {
         return;
     }
     
-    // canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
-    // canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
-    // canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
-    //
-    // canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
-    // canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
+    canvas.onmousedown = function (ev) { onMouseDown(ev, gl, canvas, a_Position);};
+    canvas.onmouseup = function (ev) { onMouseUp(ev, gl, canvas, a_Position);};
+    canvas.onmousemove = function (ev) { onMouseMove(ev, gl, canvas, a_Position);};
+
+    canvas.addEventListener("touchstart", function (ev) { onTouchStart(ev, gl, canvas, a_Position);});
+    canvas.addEventListener("touchend", function (ev) { onTouchEnd(ev, gl, canvas, a_Position);});
+    canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
 
     gl.vertexAttrib1f(a_PointSize, 10.0);
     // gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
     gl.uniform4f(u_Translation, 0.5, 0, 0, 0);
 
-    // var u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
-    // var u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
-    // var angle = 90.0;
-    // var radian = Math.PI * angle / 180.0;
-    // var CosB = Math.cos(radian);
-    // var SinB = Math.sin(radian);
-    // gl.uniform1f(u_CosB, CosB);
-    // gl.uniform1f(u_SinB, SinB);
+    var u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
+    var u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
+    var angle = 90.0;
+    var radian = Math.PI * angle / 180.0;
+    var CosB = Math.cos(radian);
+    var SinB = Math.sin(radian);
+    gl.uniform1f(u_CosB, CosB);
+    gl.uniform1f(u_SinB, SinB);
 
     red = 255.0;
     green = 0.0;

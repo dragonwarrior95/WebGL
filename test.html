@@ -39,16 +39,38 @@
             height: 50px;
             bottom: 0;
         }
+
+        #img {
+            top: 0px;
+            position: absolute;
+        }
+        #box {
+            width: 500px;
+            height: 500px;
+            border: solid 1px red;
+        }
+        #msg {
+            width: auto;
+            height: 500px;
+            overflow-y: auto;
+            border: solid 1px red;
+            color: #000;
+            text-align: left;
+        }
     </style>
+    <script src="test.js"></script>
 </head>
 <body>
+    <div id="box"></div>
+    <img id="img" src="1.jpg" width="200px" height="auto">
+    <div id="msg"></div>
     <div class="div-box">
     <div class="div1">div1固定高度</div>
-    <div class="div1">div2固定高度</div>
-    <div class="div1">div3固定高度</div>
+    <div class="div2">div2固定高度</div>
+    <div class="div3">div3固定高度</div>
     <div class="div4">
-        <audio id="player" src="mo.mp3">
-        </audio>
+        <!--<audio id="player" src="mo.mp3">-->
+        <!--</audio>-->
     </div>
     <div class="div5">div5固定高度</div>
 </div>

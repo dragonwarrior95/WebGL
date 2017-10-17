@@ -205,7 +205,7 @@ class JFilterBase {
 
     filterToFBO (bSavePixels)
     {
-        if (self.bindFBO() == false)
+        if (this.bindFBO() == false)
         {
             print("bin fbo fail");
             return 0;
@@ -216,13 +216,18 @@ class JFilterBase {
         this.initVertexBuffers(this.m_textureWidth, this.m_textureHeight);
 
         this.bindTexture();
-        this.m_webGL.last_flush();
+        // this.m_webGL.last_flush();
 
         if(bSavePixels)
         {
             // 保存纹理
         }
-        self.unBindFBO();
+        this.unBindFBO();
         return this.m_FrameBufferTexture;
+    }
+
+    getWebGL ()
+    {
+        return this.m_webGL;
     }
 }
