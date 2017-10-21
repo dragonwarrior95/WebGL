@@ -209,7 +209,6 @@ function onLoadImage(fileName) {
         draw(canvas);
     };
     image.src = fileName;
-    $("img").src = fileName;
 }
 
 function onLoadImageEx(fileName) {
