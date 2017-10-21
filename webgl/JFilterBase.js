@@ -25,8 +25,6 @@ class JFilterBase {
 
         this.m_vshader = null;
         this.m_fshader = null;
-
-        this.initlize();
     }
 
     initlize() {
@@ -52,14 +50,7 @@ class JFilterBase {
 
     }
 
-    initVertexBuffers(width, height) {
-        var verticesTexCoords = new Float32Array([
-            0.0,    height,0.0,1.0,
-            width,  height,0.0,0.0,
-            0.0,    0.0,   1.0,0.0,
-            width,  0.0,   1.0,1.0
-        ]);
-
+    setVertexBuffers(verticesTexCoords) {
         // 创建缓冲区对象
         if (this.m_vertexBuffer) {
             this.m_webGL.deleteBuffer(this.m_vertexBuffer);
@@ -70,13 +61,13 @@ class JFilterBase {
             return -1;
         }
         // 将缓冲区对象绑定到目标
-        this.m_webGL.bindBuffer(this.m_webGL.ARRAY_BUFFER, vertexBuffer);
+        this.m_webGL.bindBuffer(this.m_webGL.ARRAY_BUFFER, this.m_vertexBuffer);
         // 向缓冲区对象写入数据
         this.m_webGL.bufferData(this.m_webGL.ARRAY_BUFFER, verticesTexCoords, this.m_webGL.STATIC_DRAW);
         // 将缓冲区对象分配给a_Position变量
-        this.m_webGL.vertexAttribPointer(a_Position, 2, this.m_webGL.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, 0);
+        this.m_webGL.vertexAttribPointer(this.a_PositionHandle, 2, this.m_webGL.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, 0);
         // 连接a_Position变量与分配给他的缓冲区对象
-        this.m_webGL.enableVertexAttribArray(a_Position);
+        this.m_webGL.enableVertexAttribArray(this.a_PositionHandle);
 
         if (!this.m_texCoordBuffer) {
             this.m_webGL.deleteBuffer(this.m_texCoordBuffer);
@@ -84,8 +75,37 @@ class JFilterBase {
         this.m_texCoordBuffer = this.m_webGL.createBuffer();
         this.m_webGL.bindBuffer(this.m_webGL.ARRAY_BUFFER, this.m_texCoordBuffer);
         this.m_webGL.bufferData(this.m_webGL.ARRAY_BUFFER, verticesTexCoords, this.m_webGL.STATIC_DRAW);
-        this.m_webGL.vertexAttribPointer(a_TexCoord, 2, this.m_webGL.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, verticesTexCoords.BYTES_PER_ELEMENT * 2);
-        this.m_webGL.enableVertexAttribArray(a_TexCoord);
+        this.m_webGL.vertexAttribPointer(this.a_TexCoordHandle, 2, this.m_webGL.FLOAT, false, verticesTexCoords.BYTES_PER_ELEMENT * 4, verticesTexCoords.BYTES_PER_ELEMENT * 2);
+        this.m_webGL.enableVertexAttribArray(this.a_TexCoordHandle);
+    }
+
+    setVertexBuffers(vertexs, texCoords) {
+        // 创建缓冲区对象
+        if (this.m_vertexBuffer) {
+            this.m_webGL.deleteBuffer(this.m_vertexBuffer);
+        }
+        this.m_vertexBuffer = this.m_webGL.createBuffer();
+        if (!this.m_vertexBuffer) {
+            print("create Buffer failure......");
+            return -1;
+        }
+        // 将缓冲区对象绑定到目标
+        this.m_webGL.bindBuffer(this.m_webGL.ARRAY_BUFFER, this.m_vertexBuffer);
+        // 向缓冲区对象写入数据
+        this.m_webGL.bufferData(this.m_webGL.ARRAY_BUFFER, vertexs, this.m_webGL.STATIC_DRAW);
+        // 将缓冲区对象分配给a_Position变量
+        this.m_webGL.vertexAttribPointer(this.a_PositionHandle, 2, this.m_webGL.FLOAT, false, 0, 0);
+        // 连接a_Position变量与分配给他的缓冲区对象
+        this.m_webGL.enableVertexAttribArray(this.a_PositionHandle);
+
+        if (!this.m_texCoordBuffer) {
+            this.m_webGL.deleteBuffer(this.m_texCoordBuffer);
+        }
+        this.m_texCoordBuffer = this.m_webGL.createBuffer();
+        this.m_webGL.bindBuffer(this.m_webGL.ARRAY_BUFFER, this.m_texCoordBuffer);
+        this.m_webGL.bufferData(this.m_webGL.ARRAY_BUFFER, texCoords, this.m_webGL.STATIC_DRAW);
+        this.m_webGL.vertexAttribPointer(this.a_TexCoordHandle, 2, this.m_webGL.FLOAT, false, 0, 0);
+        this.m_webGL.enableVertexAttribArray(this.a_TexCoordHandle);
     }
 
     bind(textureId, width, height) {
@@ -250,10 +270,12 @@ class JFilterBase {
             0.0,0.0,                        0.0,0.0,
             this.m_TextureWidth,0.0,             1.0,0.0
         ]);
-        this.setUniformMatrix4fv("u_ModelMatrix", false, this.m_modelMatrix.elements);// 设置u_ModelMatrix变量
-        this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*0);
-        this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*2);
         this.bindTexture();// 设置纹理变量
+        this.setUniformMatrix4fv("u_ModelMatrix", false, this.m_modelMatrix.elements);// 设置u_ModelMatrix变量
+        // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*0);
+        // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*2);
+        this.setVertexBuffers(vertexBufferData);
+        this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
 
         if(bSavePixels)
         {
@@ -276,10 +298,11 @@ class JFilterBase {
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
 
             this.setUniformMatrix4fv("u_ModelMatrix", false, uMatrix.elements);// 设置u_ModelMatrix变量
-            this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
-            this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
+            this.setVertexBuffers(vertexs, texcoords);
+            // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
+            // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
 
-            this.m_webGL.drawArrays(this.m_webGL.POINTS, 0, 4);
+            this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
         }
     }
     filterToScreenSample(uMatrix, vertexs, texcoords, screenWidth, screenHeight)
@@ -294,8 +317,9 @@ class JFilterBase {
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
 
             this.setUniformMatrix4fv("u_ModelMatrix", false, uMatrix.elements);// 设置u_ModelMatrix变量
-            this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
-            this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
+            this.setVertexBuffers(vertexs, texcoords);
+            // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
+            // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
 
             this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
         }
