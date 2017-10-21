@@ -122,9 +122,13 @@ class JFilterBase {
 
         this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
         this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
-        this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
+        // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
+        // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_S, this.m_webGL.CLAMP_TO_EDGE);
+        // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_T, this.m_webGL.CLAMP_TO_EDGE);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_S, this.m_webGL.CLAMP_TO_EDGE);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_T, this.m_webGL.CLAMP_TO_EDGE);
+        this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
+        this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MAG_FILTER, this.m_webGL.LINEAR);
 
         this.m_textureWidth = image.width;
         this.m_textureHeight = image.height;
@@ -145,22 +149,25 @@ class JFilterBase {
 
     getShader() {
         this.m_vshader = (`
-            precision highp float;
+            precision mediump float;
+            uniform mat4 u_ModelMatrix;
+            
             attribute vec4 a_Position;
             attribute vec2 a_TexCoord;
+            
             varying vec2 v_TexCoord;
-            uniform mat4 u_ModelMatrix;
             
             void main()
             {
-                gl_Position = u_ModelMatrix * a_Position;
+                gl_Position = u_ModelMatrix*a_Position;
                 v_TexCoord = a_TexCoord;
             }
         `);
 
         this.m_fshader = (`
-            precision highp float;
+            precision mediump float;
             uniform sampler2D u_Sampler;
+            
             varying vec2 v_TexCoord;
             
             void main()
@@ -182,12 +189,11 @@ class JFilterBase {
         {
             return 0;
         }
-        this.m_webGL.pixelStorei(this.m_webGL.UNPACK_FLIP_Y_WEBGL, 1);// 对纹理图片进行Y轴反转
+        // this.m_webGL.pixelStorei(this.m_webGL.UNPACK_FLIP_Y_WEBGL, 1);// 对纹理图片进行Y轴反转
         this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, texture);
-        this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
+        this.m_webGL.texImage2D(this.m_webGL.TEXTURE_2D, 0, this.m_webGL.RGBA, width, height, 0, this.m_webGL.RGBA, this.m_webGL.UNSIGNED_BYTE, null);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_S, this.m_webGL.CLAMP_TO_EDGE);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_T, this.m_webGL.CLAMP_TO_EDGE);
-        this.m_webGL.texImage2D(this.m_webGL.TEXTURE_2D, 0, this.m_webGL.RGBA, width, height, 0, this.m_webGL.RGBA, this.m_webGL.UNSIGNED_BYTE, null);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
         this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MAG_FILTER, this.m_webGL.LINEAR);
 
@@ -309,7 +315,7 @@ class JFilterBase {
     {
         if (this.m_textureId && this.m_webGL.program)
         {
-            this.unBindFBO();
+            // this.unBindFBO();
             // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
             // this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
