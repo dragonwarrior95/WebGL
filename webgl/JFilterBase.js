@@ -269,8 +269,8 @@ class JFilterBase {
     {
         if (this.filterToFBO() && this.m_webGL.program)
         {
-            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
-            this.useProgram();
+            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            // this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_FrameBufferTexture);
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
@@ -279,15 +279,16 @@ class JFilterBase {
             this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
             this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
 
-            this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
+            this.m_webGL.drawArrays(this.m_webGL.POINTS, 0, 4);
         }
     }
     filterToScreenSample(uMatrix, vertexs, texcoords, screenWidth, screenHeight)
     {
         if (this.m_textureId && this.m_webGL.program)
         {
-            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
-            this.useProgram();
+            this.unBindFBO();
+            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            // this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);

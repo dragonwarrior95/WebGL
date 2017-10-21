@@ -137,7 +137,7 @@ function main() {
     // canvas.addEventListener("touchmove", function (ev) { onTouchMove(ev, gl, canvas, a_Position);});
     onLoadImage("1.jpg");
 
-
+    requestAnimationFrame(draw);
     // gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
 }
 
@@ -160,7 +160,7 @@ function draw(canvas) {
         return;
     }
     let webGL = filterBase.getWebGL();
-    webGL.clearColor(160.0/255.0, 160.0/255.0, 160.0/255.0, 1.0);
+    webGL.clearColor(224.0/255.0, 224.0/255.0, 224.0/255.0, 1.0);
     webGL.clear(gl.COLOR_BUFFER_BIT);
     let Projection = new Matrix4();
     Projection.setIdentity();
@@ -197,6 +197,9 @@ function draw(canvas) {
     filterBase.initlize();
     filterBase.bind(glTexture, glTexture.width, glTexture.height);
     filterBase.filterToScreenSample(Projection.multiply(TRSMat), vertexs, texcoords, width, height);
+
+
+    // requestAnimationFrame(draw);
 }
 
 function onLoadImage(fileName) {
