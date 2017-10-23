@@ -188,10 +188,10 @@ function draw(canvas) {
         width, height
     ]);
     let texcoords = new Float32Array([
-        0.0,0.0,
-        1.0,0.0,
         0.0,1.0,
-        1.0,1.0
+        1.0,1.0,
+        0.0,0.0,
+        1.0,0.0
     ]);
     filterBase.filterToScreenSample(Projection.multiply(TRSMat), vertexs, texcoords, width, height);
 
@@ -205,6 +205,7 @@ function onLoadImage(fileName) {
         // setAutoShow(gl, image.width, image.height);// 图片加载为设置自适应
         print("Image(" + image.width +", " + image.height+")");
         glTexture = filterBase.loadTexture(image);
+        filterBase.bindTexture(glTexture, image.width, image.height);
         var canvas = $("canvas");
         draw(canvas);
     };

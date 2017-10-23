@@ -122,6 +122,7 @@ class JFilterBase {
 
         this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
         this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
+        this.m_webGL.texImage2D(this.m_webGL.TEXTURE_2D, 0, this.m_webGL.RGBA, this.m_webGL.RGBA, this.m_webGL.UNSIGNED_BYTE, image);
         // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_MIN_FILTER, this.m_webGL.LINEAR);
         // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_S, this.m_webGL.CLAMP_TO_EDGE);
         // this.m_webGL.texParameteri(this.m_webGL.TEXTURE_2D, this.m_webGL.TEXTURE_WRAP_T, this.m_webGL.CLAMP_TO_EDGE);
@@ -257,10 +258,12 @@ class JFilterBase {
             return 0;
         }
 
+        this.print("width: " + this.m_textureWidth);
         this.useProgram();
         this.m_webGL.viewport(0, 0, this.m_textureWidth, this.m_textureHeight);// 设置离屏渲染区域
 
         this.m_modelMatrix = new Matrix4();
+        this.m_modelMatrix.setIdentity();
         this.m_modelMatrix.ortho(0.0, this.m_textureWidth, 0.0, this.m_textureHeight, -1.0, 1.0);
         // GLfloat vertexs[8] = { 0.0f, (float)m_TextureHeight,
         // (float)m_TextureWidth, (float)m_TextureHeight,
@@ -270,17 +273,23 @@ class JFilterBase {
         // 1.0f, 1.0f,
         // 0.0f, 0.0f,
         // 1.0f, 0.0f };
-        let vertexBufferData = new Float32Array([
-            0.0,this.m_TextureHeight,            0.0,1.0,
-            this.m_TextureWidth, this.m_TextureHeight,1.0,1.0,
-            0.0,0.0,                        0.0,0.0,
-            this.m_TextureWidth,0.0,             1.0,0.0
+        let vertexs = new Float32Array([
+            0.0,this.m_TextureHeight,
+            this.m_TextureWidth, this.m_TextureHeight,
+            0.0,0.0,
+            this.m_TextureWidth,0.0
+        ]);
+        let texCoords = new Float32Array([
+            0.0, 1.0,
+            1.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0
         ]);
         this.bindTexture();// 设置纹理变量
         this.setUniformMatrix4fv("u_ModelMatrix", false, this.m_modelMatrix.elements);// 设置u_ModelMatrix变量
         // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*0);
         // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, vertexBufferData, 2, this.m_webGL.FLOAT, false, vertexBufferData.BYTES_PER_ELEMENT*4, vertexBufferData.BYTES_PER_ELEMENT*2);
-        this.setVertexBuffers(vertexBufferData);
+        this.setVertexBuffers(vertexs, texCoords);
         this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
 
         if(bSavePixels)
@@ -297,8 +306,8 @@ class JFilterBase {
     {
         if (this.filterToFBO() && this.m_webGL.program)
         {
-            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
-            // this.useProgram();
+            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_FrameBufferTexture);
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
@@ -316,8 +325,8 @@ class JFilterBase {
         if (this.m_textureId && this.m_webGL.program)
         {
             // this.unBindFBO();
-            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
-            // this.useProgram();
+            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
