@@ -273,11 +273,17 @@ class JFilterBase {
         // 1.0f, 1.0f,
         // 0.0f, 0.0f,
         // 1.0f, 0.0f };
+        // let vertexs = new Float32Array([
+        //     0.0,this.m_TextureHeight,
+        //     this.m_TextureWidth, this.m_TextureHeight,
+        //     0.0,0.0,
+        //     this.m_TextureWidth,0.0
+        // ]);
         let vertexs = new Float32Array([
-            0.0,this.m_TextureHeight,
-            this.m_TextureWidth, this.m_TextureHeight,
-            0.0,0.0,
-            this.m_TextureWidth,0.0
+            -1.0, 1.0,//左上角——v0
+            1.0,  1.0,//右上角——v2
+            -1.0,-1.0,//左下角——v1
+            1.0, -1.0 //右下角——v3
         ]);
         let texCoords = new Float32Array([
             0.0, 1.0,
@@ -313,9 +319,9 @@ class JFilterBase {
             this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
 
             this.setUniformMatrix4fv("u_ModelMatrix", false, uMatrix.elements);// 设置u_ModelMatrix变量
-            this.setVertexBuffers(vertexs, texcoords);
-            // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
-            // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
+            // this.setVertexBuffers(vertexs, texcoords);
+            this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
+            this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
 
             this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
         }
@@ -325,7 +331,7 @@ class JFilterBase {
         if (this.m_textureId && this.m_webGL.program)
         {
             // this.unBindFBO();
-            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
             this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
