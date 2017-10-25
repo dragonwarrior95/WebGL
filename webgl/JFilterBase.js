@@ -108,6 +108,50 @@ class JFilterBase {
         this.m_webGL.enableVertexAttribArray(this.a_TexCoordHandle);
     }
 
+    setAutoShowSize(textureWidth, textureHeight, screenWidth, screenHeight)
+    {
+        var startXonCanvas; // 图片在画布上显示的起始位置
+        var startYonCanvas;
+        var imgShowWidth;   // 图片显示宽高
+        var imgShowHeight;
+        var scale = 1.0;    // 缩放倍数
+
+        if (screenWidth >= textureWidth && screenHeight >= textureHeight) {
+            // 画布大
+            startXonCanvas = (screenWidth - textureWidth) / 2.0;
+            startYonCanvas = (screenHeight - textureHeight) / 2.0;
+            imgShowWidth = textureWidth;
+            imgShowHeight = textureHeight;
+        }
+        else {
+            var percentW = screenWidth / textureWidth;
+            var percentH = screenHeight / textureHeight;
+
+            if (percentH < percentW)
+                scale = percentH;
+            else
+                scale = percentW;
+            //得到缩略图的显示大小
+            imgShowWidth = textureWidth * scale;
+            imgShowHeight = textureHeight * scale;
+
+            startXonCanvas = (screenWidth - imgShowWidth) / 2.0;
+            startYonCanvas = (screenHeight - imgShowHeight) / 2.0;
+        }
+
+        // 转换为WebGL的顶点坐标
+        let width = screenWidth / 2;
+        let height= screenHeight/ 2;
+        let vertices = new Float32Array([
+            (startXonCanvas - width) / width,(height - startYonCanvas) / height,    // 左上
+            (width - startXonCanvas) / width,(height - startYonCanvas) / height,    // 右上
+            (startXonCanvas - width) / width,(startYonCanvas - height) / height,    // 左下
+            (width - startXonCanvas) / width,(startYonCanvas - height) / height     // 右下
+        ]);
+
+        return vertices;
+    }
+
     bind(textureId, width, height) {
         this.m_textureId = textureId;
         this.m_textureWidth = width;

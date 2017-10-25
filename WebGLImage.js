@@ -153,8 +153,8 @@ function animal(angle) {
 }
 
 function draw(canvas) {
-    let width = canvas.width;
-    let height= canvas.height;
+    let width = canvas.clientWidth;
+    let height= canvas.clientHeight;
 
     if (!filterBase || !glTexture) {
         return;
@@ -167,35 +167,16 @@ function draw(canvas) {
     // Projection.ortho(0.0, width, height, -1.0, 1.0);
     let TRSMat = new Matrix4();
     TRSMat.scale(1.0, 1.0, 1.0);
-    TRSMat.translate(-width/2.0, -height/2.0, 0.0);
+    TRSMat.translate(0.0, 0.0, 0.0);
 
-    // QRect rcShow = CenterScaleImage(m_nTextureWidth, m_nTextureHeight, nWidth, nHeight);
-    // GLfloat vertexs[8] = {
-    //     -rcShow.width() / 2.0f, rcShow.height() / 2.0f,
-    //     rcShow.width() / 2.0f, rcShow.height() / 2.0f,
-    //     -rcShow.width() / 2.0f, -rcShow.height() / 2.0f,
-    //     rcShow.width() / 2.0f, -rcShow.height() / 2.0f
-    // };
-// 	GLfloat vertexs[8] = { 0.0f, 0.0f,
-// 		(float)m_nTextureWidth, 0,
-// 		0.0f, (float)m_nTextureHeight,
-// 		(float)m_nTextureWidth, (float)m_nTextureHeight};
-
-    let vertexs = new  Float32Array([
-        0.0, 0.0,
-        width, 0.0,
-        0.0, height,
-        width, height
-    ]);
+    let vertexs = filterBase.setAutoShowSize(filterBase.m_textureWidth, filterBase.m_textureHeight, width, height);
     let texcoords = new Float32Array([
-        0.0,1.0,
-        1.0,1.0,
-        0.0,0.0,
-        1.0,0.0
+        0.0, 1.0,//左上角——uv0
+        1.0, 1.0,//右上角——uv2
+        0.0, 0.0,//左下角——uv1
+        1.0, 0.0 //右下角——uv3
     ]);
     filterBase.filterToScreenSample(Projection.multiply(TRSMat), vertexs, texcoords, width, height);
-
-
     // requestAnimationFrame(draw);
 }
 
