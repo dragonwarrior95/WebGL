@@ -13,7 +13,8 @@ class JFilterBase {
         this.m_RenderBufferObj = 0;    // 渲染缓冲区对象
         this.m_textureWidth = 0;
         this.m_textureHeight = 0;
-
+        this.m_frameWidth = 0;
+        this.m_frameHeight= 0;
 
         this.m_vertexBuffer = null;   // 顶点坐标值
         this.m_texCoordBuffer = null; // 纹理坐标值
@@ -26,7 +27,10 @@ class JFilterBase {
         this.m_vshader = null;
         this.m_fshader = null;
     }
-
+    setFrameSize(clientWidth, clientHeight) {
+        this.m_frameWidth = clientHeight;
+        this.m_frameHeight = clientHeight;
+    }
     initlize() {
         this.getShader();
         if (!initShaders(this.m_webGL, this.m_vshader, this.m_fshader)) {
