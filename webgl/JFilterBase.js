@@ -8,16 +8,23 @@ class JFilterBase {
     constructor(webGL) {
         var self = this;
         this.m_webGL = webGL;           // GL对象
-        this.m_FrameBufferTexture = 0;// 离屏渲染纹理
-        this.m_FrameBufferObj = 0;     // 帧缓冲区对象
-        this.m_RenderBufferObj = 0;    // 渲染缓冲区对象
+        this.m_FrameBufferTexture = 0;  // 离屏渲染纹理
+        this.m_FrameBufferObj = 0;      // 帧缓冲区对象
+        this.m_RenderBufferObj = 0;     // 渲染缓冲区对象
         this.m_textureWidth = 0;
         this.m_textureHeight = 0;
         this.m_frameWidth = 0;
         this.m_frameHeight= 0;
+        this.m_textureShowWidth = 0;    // 纹理显示宽高
+        this.m_textureShowHeight = 0;
 
-        this.m_vertexBuffer = null;   // 顶点坐标值
-        this.m_texCoordBuffer = null; // 纹理坐标值
+        this.m_Scale = 1.0;             // 缩放
+        this.m_Rotate = 0.0;            // 旋转
+        this.m_translateX = 0.0;        // 平移
+        this.m_translateY = 0.0;
+
+        this.m_vertexBuffer = null;     // 顶点坐标值
+        this.m_texCoordBuffer = null;   // 纹理坐标值
 
         this.m_modelMatrix = new Matrix4();
         this.m_modelMatrix.setScale(1.0, 1.0, 1.0);
@@ -26,6 +33,18 @@ class JFilterBase {
 
         this.m_vshader = null;
         this.m_fshader = null;
+    }
+    setRotate(rotate) {
+        this.m_Rotate = rotate;
+        this.update();
+    }
+    setScale(scale) {
+        this.m_Scale = scale/100.0;
+        this.update();
+    }
+    seTranslate(x, y) {
+        this.m_translateX += x;
+        this.m_translateY += y;
     }
     setFrameSize(clientWidth, clientHeight) {
         this.m_frameWidth = clientHeight;
@@ -181,6 +200,21 @@ class JFilterBase {
 
         this.m_textureWidth = image.width;
         this.m_textureHeight = image.height;
+        this.m_textureShowWidth = this.m_textureWidth;
+        this.m_textureShowHeight = this.m_textureHeight;
+        this.m_Scale = 1.0;
+        if (this.m_frameWidth < this.m_textureShowWidth) {
+            this.m_textureShowWidth = this.m_frameWidth;
+            var scale = this.m_textureShowWidth / this.m_textureWidth;
+            this.m_textureShowHeight = scale*this.m_textureHeight;
+            this.m_Scale *= scale;
+        }
+        if(this.m_frameHeight < this.m_textureShowHeight) {
+            this.m_textureShowHeight = this.m_frameHeight;
+            var scale = this.m_textureShowHeight / this.m_textureHeight;
+            this.m_textureShowWidth = scale*this.m_textureWidth;
+            this.m_Scale *= scale;
+        }
 
         return this.m_textureId;
     }
@@ -193,7 +227,7 @@ class JFilterBase {
 
     // 更新参数
     update() {
-
+        this.draw();
     }
 
     getShader() {
@@ -360,7 +394,7 @@ class JFilterBase {
     {
         if (this.filterToFBO() && this.m_webGL.program)
         {
-            this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
+            // this.m_webGL.viewport(0, 0, screenWidth, screenHeight);
             this.useProgram();
             this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
             this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_FrameBufferTexture);
@@ -389,6 +423,48 @@ class JFilterBase {
             this.setVertexBuffers(vertexs, texcoords);
             // this.setVertexAttribPointer("a_Position", this.m_vertexBuffer, vertexs, 2, this.m_webGL.FLOAT, false, 0, 0);
             // this.setVertexAttribPointer("a_TexCoord", this.m_texCoordBuffer, texcoords, 2, this.m_webGL.FLOAT, false, 0, 0);
+
+            this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
+        }
+    }
+
+    draw()
+    {
+        // filterBase.filterToScreenSample(Projection.multiply(TRSMat), vertexs, texcoords, width, height);
+        if (this.m_textureId && this.m_webGL.program)
+        {
+            // this.unBindFBO();
+            this.m_webGL.viewport(0, 0, this.m_frameWidth, this.m_frameHeight);
+            this.useProgram();
+
+            let Projection = new Matrix4();
+            Projection.ortho(0.0, this.m_frameWidth, 0.0, this.m_frameHeight, -1.0, 1.0);
+
+            let TRSMat = new Matrix4();
+            TRSMat.translate(this.m_frameWidth / 2.0, this.m_frameHeight / 2.0, 0.0);
+            TRSMat.scale(this.m_Scale,  this.m_Scale,  1.0);
+            TRSMat.rotate(this.m_Rotate,  0, 0, 1);
+            TRSMat.translate(this.m_translateX, this.m_translateY, 0.0);
+
+            let vertexs = new Float32Array([
+                -this.m_textureWidth/2, this.m_textureHeight/2, //左上角——v0
+                this.m_textureWidth/2,  this.m_textureHeight/2, //右上角——v2
+                -this.m_textureWidth/2, -this.m_textureHeight/2,//左下角——v1
+                this.m_textureWidth/2,  -this.m_textureHeight/2 //右下角——v3
+            ]);
+            let texcoords = new Float32Array([
+                0.0, 1.0,//左上角——uv0
+                1.0, 1.0,//右上角——uv2
+                0.0, 0.0,//左下角——uv1
+                1.0, 0.0 //右下角——uv3
+            ]);
+
+            this.m_webGL.activeTexture(this.m_webGL.TEXTURE0);
+            this.m_webGL.bindTexture(this.m_webGL.TEXTURE_2D, this.m_textureId);
+            this.m_webGL.uniform1i(this.u_SamplerHandle, 0);
+
+            this.setUniformMatrix4fv("u_ModelMatrix", false, Projection.multiply(TRSMat).elements);// 设置u_ModelMatrix变量
+            this.setVertexBuffers(vertexs, texcoords);
 
             this.m_webGL.drawArrays(this.m_webGL.TRIANGLE_STRIP, 0, 4);
         }
